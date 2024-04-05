@@ -16,34 +16,64 @@ const getAllUsers = async (req, res) => {
     }
 }
 
-const createNewUsers = (req, res) => {
-    console.log(req.body);
-    res.json({
-        message: 'CREATE new user success',
-        data: req.body
-    })
+const createNewUsers = async (req, res) => {
+    const {body} = req;
+
+    if(!body.email || !body.name || !body.address){
+        return res.status(400).json({
+            message: "Your data is wrong",
+            data: null,
+        })
+    }
+
+    try {
+        await UsersModel.createNewUsers(body)
+        res.status(201).json({
+            message: 'CREATE new user success',
+            data: body
+        })
+    } catch (error) {
+        res.status(500).json({
+            message: 'Server Error',
+            serverMessage: error,
+        })
+    }
+
 }
 
-const updateUser = (req, res) => {
+const updateUser = async (req, res) => {
     const {idUser} = req.params;
-    console.log('idUser: ', idUser);
-    res.json({
-        message: 'UPDATE user success',
-        data: req.body,
-    })
+    const {body} = req;
+    try {
+        await UsersModel.updateUser(body, idUser);
+        res.json({
+            message: 'UPDATE user success',
+            data: {
+                id: idUser,
+                ...body
+            },
+        })
+    } catch (error) {
+        res.status(500).json({
+            message: 'Server Error',
+            serverMessage: error,
+        })
+    }
 }
 
-const deleteUser = (req, res) => {
+const deleteUser = async (req, res) => {
     const {idUser} = req.params;
-    res.json({
-        message: "DELETE user success",
-        data: {
-            id: idUser,
-            name: "Hafiz",
-            email: "hafiz@gmail.com",
-            address: "Jakarta",
-        }
-    })
+    try {
+        await UsersModel.deleteUser(idUser)
+        res.json({
+            message: `DELETE user with id ${idUser} success`,
+        })
+    } catch (error) {
+        res.status(500).json({
+            message: 'Server Error',
+            serverMessage: error,
+        })
+    }
 }
 
 module.exports = {
